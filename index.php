@@ -9,7 +9,7 @@
 <body>
     <!-- <h1 class="form-title">Personal Data</h1> -->
     <form action="submit.php" method="POST" id="personalForm" class="personal-form">
-        <!-- Personal Data Section -->
+        <!-- Personal Data -->
         <h2 class="section-title">Personal Data</h2>
         <div class="form-group">
             <label for="last_name" class="form-label">Last Name:</label>
@@ -42,19 +42,40 @@
         </div>
 
         <div class="form-group">
-            <label for="civil_status" class="form-label">Civil Status:</label>
-            <select name="civil_status" id="civil_status" required class="form-select">
-                <option value="single">Single</option>
-                <option value="married">Married</option>
-                <option value="widowed">Widowed</option>
-                <option value="legally_separated">Legally Separated</option>
-                <option value="others">Others</option>
-            </select>
+    <label for="civil_status" class="form-label">Civil Status:</label>
+    <select name="civil_status" id="civil_status" required class="form-select" onchange="toggleOthersField()">
+        <option value="single">Single</option>
+        <option value="married">Married</option>
+        <option value="widowed">Widowed</option>
+        <option value="legally_separated">Legally Separated</option>
+        <option value="others">Others</option>
+    </select>
+</div>
+
+        <!-- Others input field (Initially Hidden) -->
+        <div id="othersField" class="form-group" style="display: none; margin-top: 10px;">
+            <label for="othersInput" class="form-label">Specify Others:</label>
+            <input type="text" name="othersInput" id="othersInput" class="form-control">
         </div>
+
+        <script>
+            function toggleOthersField() {
+                var civilStatus = document.getElementById("civil_status").value;
+                var othersField = document.getElementById("othersField");
+
+                // Show text input only when "Others" is selected
+                if (civilStatus === "others") {
+                    othersField.style.display = "block";
+                } else {
+                    othersField.style.display = "none";
+                }
+            }
+        </script>
+
     
         <div class="form-group">
-            <label for="tax_id" class="form-label">Tax ID:</label>
-            <input type="text" id="tax_id" name="tax_id" pattern="\d+" placeholder="Numbers only" class="form-input">
+            <label for="tax_id" class="form-label">Tax Identification Number:</label>
+            <input type="text" id="tax_id" name="tax_id" pattern="\d+"  class="form-input">
         </div> 
      
         <div class="form-group">
@@ -67,7 +88,8 @@
             <input type="text" id="religion" name="religion" class="form-input">
         </div>
 
-        <!-- Address Section -->
+        <!------------------------------ place of birth ---------------->
+         
         <h2 class="section-title">Place of Birth</h2>
         <div class="form-group">
             <label for="birth_rm_unit" class="form-label">RM/FLR/Unit No. & Bldg. Name:</label>
@@ -125,7 +147,7 @@
             <label for="birth_zip" class="form-label">Zip Code:</label>
             <input type="text" id="zip_code" name="zip_code" class="form-input">
         </div>
-
+    <!----------------------------------- home------------------ -->
         <h2 class="section-title">Home Address</h2>
         <div class="form-group">
             <label for="home_rm_unit" class="form-label">RM/FLR/Unit No. & Bldg. Name:</label>
@@ -175,13 +197,13 @@
 
         <div class="form-group">
             <label for="home_zip" class="form-label">Zip Code:</label>
-            <input type="text" id="home_zip" name="home_zip_code" class="form-input">
+            <input type="text" id="home_zip" name="home_zip_code"  class="form-input" required>
 
         </div>
 
         <div class="form-group">
             <label for="mobile" class="form-label">Mobile Number:</label>
-            <input type="text" id="mobile" name="mobile" required pattern="\d+" placeholder="Numbers only" class="form-input">
+            <input type="text" id="mobile" name="mobile" required pattern="\d+"  class="form-input">
         </div>
 
         <div class="form-group">
@@ -191,7 +213,7 @@
 
         <div class="form-group">
             <label for="telephone" class="form-label">Telephone Number:</label>
-            <input type="text" id="telephone" name="telephone" pattern="\d+" placeholder="Numbers only" class="form-input">
+            <input type="text" id="telephone" name="telephone" pattern="\d+" class="form-input">
         </div>
 
         <!-- Parent's Information Section -->
