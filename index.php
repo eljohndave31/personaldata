@@ -7,10 +7,10 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- <h1 class="form-title">Personal Data</h1> -->
+     <h1 class="form-title">PERSONAL DATA</h1> 
     <form action="submit.php" method="POST" id="personalForm" class="personal-form">
-        <!-- Personal Data -->
-        <h2 class="section-title">Personal Data</h2>
+    
+        <h2 class="section-title">Personal Information</h2>
         <div class="form-group">
             <label for="last_name" class="form-label">Last Name:</label>
             <input type="text" id="last_name" name="last_name" required pattern="^[A-Za-z\s]+$" class="form-input">
@@ -63,7 +63,7 @@
                 var civilStatus = document.getElementById("civil_status").value;
                 var othersField = document.getElementById("othersField");
 
-                // Show text input only when "Others" is selected
+                
                 if (civilStatus === "others") {
                     othersField.style.display = "block";
                 } else {

@@ -1,8 +1,62 @@
 <?php
+// filepath: /c:/xampp/htdocs/Personal_Data/submit.php
+
+include 'db.php';
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Function to sanitize input
     function clean_input($data) {
         return htmlspecialchars(stripslashes(trim($data)));
+    }
+
+    // Function to validate required fields
+    function validate_required_fields($fields, $data) {
+        $errors = [];
+        foreach ($fields as $field) {
+            if (empty($data[$field])) {
+                $errors[$field] = ucfirst(str_replace("_", " ", $field)) . " is required.";
+            }
+        }
+        return $errors;
+    }
+
+    // Function to validate specific fields
+    function validate_specific_fields($data) {
+        $errors = [];
+        if (!preg_match("/^[A-Za-z\s]+$/", $data['last_name'])) {
+            $errors['last_name'] = "Last name should only contain letters and spaces.";
+        }
+        if (!preg_match("/^[A-Za-z\s]+$/", $data['first_name'])) {
+            $errors['first_name'] = "First name should only contain letters and spaces.";
+        }
+        if (!preg_match("/^[A-Za-z\s]+$/", $data['middle_name'])) {
+            $errors['middle_name'] = "Middle name should only contain letters and spaces.";
+        }
+        if (!empty($data['tax_id']) && !preg_match("/^\d+$/", $data['tax_id'])) {
+            $errors['tax_id'] = "Tax ID should contain numbers only.";
+        }
+        if (!preg_match("/^\d+$/", $data['mobile'])) {
+            $errors['mobile'] = "Mobile Number should contain numbers only.";
+        }
+        if (!empty($data['telephone']) && !preg_match("/^\d+$/", $data['telephone'])) {
+            $errors['telephone'] = "Telephone Number should contain numbers only.";
+        }
+        if (!empty($data['email']) && !filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+            $errors['email'] = "Invalid email format.";
+        }
+        return $errors;
+    }
+
+    // Function to validate age
+    function validate_age($dob) {
+        $dob_date = new DateTime($dob);
+        $today = new DateTime();
+        $age = $today->diff($dob_date)->y;
+
+        if ($age < 18) {
+            return "You must be at least 18 years old.";
+        }
+        return null;
     }
 
     // Initialize an array to hold errors
@@ -11,14 +65,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Required Fields Validation
     $required_fields = [
         'last_name', 'first_name', 'middle_name', 'dob', 'sex', 'civil_status', 'nationality',
-        'birth_street', 'birth_city', 'birth_country', 'home_street', 'home_city', 'home_country', 'home_zip_code' ,'mobile'
+        'birth_street', 'birth_city', 'birth_country', 'home_street', 'home_city', 'home_country', 'mobile'
     ];
 
-    foreach ($required_fields as $field) {
-        if (empty($_POST[$field])) {
-            $errors[] = ucfirst(str_replace("_", " ", $field)) . " is required.";
-        }
-    }
+    $errors = array_merge($errors, validate_required_fields($required_fields, $_POST));
 
     // Collect and sanitize form data
     $last_name = clean_input($_POST['last_name']);
@@ -27,7 +77,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $dob = clean_input($_POST['dob']);
     $sex = clean_input($_POST['sex']);
     $civil_status = clean_input($_POST['civil_status'] ?? '');
-    // If "Others" is selected, use the custom input
+
     if ($civil_status === "others" && !empty($_POST['othersInput'])) {
         $civil_status = clean_input($_POST['othersInput']);
     }
@@ -35,7 +85,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $tax_id = clean_input($_POST['tax_id']);
     $nationality = clean_input($_POST['nationality']);
     $religion = clean_input($_POST['religion']);
-    // birth place
+    
     $birth_rm_unit = clean_input($_POST['birth_rm_unit']);
     $birth_house = clean_input($_POST['birth_house']);
     $birth_street = clean_input($_POST['birth_street']);
@@ -46,7 +96,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $birth_subdivision = clean_input($_POST['birth_subdivision']);
     $birth_barangay = clean_input($_POST['birth_barangay']);
 
-    // home address
     $home_rm_unit = clean_input($_POST['home_rm_unit']);
     $home_house = clean_input($_POST['home_house']);
     $home_street = clean_input($_POST['home_street']);
@@ -60,7 +109,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = clean_input($_POST['email']);
     $telephone = clean_input($_POST['telephone']);
 
-
     $father_last_name = clean_input($_POST['father_last_name']);
     $father_first_name = clean_input($_POST['father_first_name']);
     $father_middle_name = clean_input($_POST['father_middle_name']);
@@ -69,42 +117,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $mother_middle_name = clean_input($_POST['mother_middle_name']);
 
     // Validation for specific fields
-    if (!preg_match("/^[A-Za-z\s]+$/", $last_name)) {
-        $errors[] = "Last name should only contain letters and spaces.";
-    }
-    if (!preg_match("/^[A-Za-z\s]+$/", $first_name)) {
-        $errors[] = "First name should only contain letters and spaces.";
-    }
-    if (!preg_match("/^[A-Za-z\s]+$/", $middle_name)) {
-        $errors[] = "Middle name should only contain letters and spaces.";
-    }
-    if (!empty($tax_id) && !preg_match("/^\d+$/", $tax_id)) {
-        $errors[] = "Tax ID should contain numbers only.";
-    }
-    if (!empty($home_zip) && !preg_match("/^\\d+$/", $home_zip)) {
-        $errors['home_zip'] = "Zip Code should contain numbers only.";
-    }
-    if (!preg_match("/^\d+$/", $mobile)) {
-        $errors[] = "Mobile Number should contain numbers only.";
-    }
-    if (!empty($telephone) && !preg_match("/^\d+$/", $telephone)) {
-        $errors[] = "Telephone Number should contain numbers only.";
-    }
-    if (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $errors[] = "Invalid email format.";
-    }
+    $errors = array_merge($errors, validate_specific_fields($_POST));
 
     // Age validation
-    $dob_date = new DateTime($dob);
-    $today = new DateTime();
-    $age = $today->diff($dob_date)->y;
+    $age_error = validate_age($dob);
+    if ($age_error) {
+        $errors[] = $age_error;
+    }
+ 
+    $full_name = "$last_name, $first_name $middle_name";
 
-    if ($age < 18) {
-        $errors[] = "You must be at least 18 years old.";
+    if (empty($errors)) {
+        // Insert data into the database
+        $stmt = $conn->prepare("INSERT INTO personal_info (last_name, first_name, middle_name, dob, sex, civil_status, tax_id, nationality, religion, birth_rm_unit, birth_house, birth_street, birth_city, birth_province, birth_country, birth_subdivision, birth_barangay, home_rm_unit, home_house, home_street, home_subdivision, home_barangay, home_city, home_province, home_country, zip_code, mobile, email, telephone, father_last_name, father_first_name, father_middle_name, mother_last_name, mother_first_name, mother_middle_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("ssssssssssssssssssssssssssssssssss", $last_name, $first_name, $middle_name, $dob, $sex, $civil_status, $tax_id, $nationality, $religion, $birth_rm_unit, $birth_house, $birth_street, $birth_city, $birth_province, $birth_country, $birth_subdivision, $birth_barangay, $home_rm_unit, $home_house, $home_street, $home_subdivision, $home_barangay, $home_city, $home_province, $home_country, $zip_code, $mobile, $email, $telephone, $father_last_name, $father_first_name, $father_middle_name, $mother_last_name, $mother_first_name, $mother_middle_name);
+
+        if ($stmt->execute()) {
+            $success_message = "Submission Successfully";
+        } else {
+            $errors[] = "Error: " . $stmt->error;
+        }
+
+        $stmt->close();
     }
 
-    // Format full name
-    $full_name = "$last_name, $first_name $middle_name";
+    $conn->close();
 }
 ?>
 <!DOCTYPE html>
@@ -131,7 +168,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             padding: 25px;
             border-radius: 10px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            text-align: center; 
+            text-align: center;
         }
         h1 {
             color:rgb(12, 201, 72);
@@ -176,7 +213,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
         .error {
             color: red;
-            margin-left: 10px;
+            
         }
     </style>
 </head>
