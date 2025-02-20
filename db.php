@@ -3,7 +3,7 @@
 $servername = "localhost";
 $username = "root";
 $password = "";
-$dbname = "personal_data_db";
+$dbname = "personal_info_db";
 
 // Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);

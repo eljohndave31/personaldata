@@ -2,7 +2,7 @@
 // filepath: /c:/xampp/htdocs/Personal_Data/view.php
 include 'db.php';
 
-$result = $conn->query("SELECT * FROM personal_info");
+$result = $conn->query("SELECT * FROM personal_data");
 
 if ($result->num_rows > 0) {
     echo "<table border='1'>
